@@ -117,17 +117,18 @@ namespace BooleanEquation
                 }
 
             };
-            var idempotent = new OperaterNode()
+            var De = new OperaterNode()
             {
                 OperaterType = (int)OperaterNode.Operater.Or,
                 Operands = new List<OperaterNode>()
                 {
                     new OperaterNode(){ Name="A",Value=true },
-                    new OperaterNode(){ Name="A",Value=false },
+                    new OperaterNode(){ Name="B",Value=true },
+                    new OperaterNode(){ OperaterType=(int)OperaterNode.Operater.And,Operands=new List<OperaterNode>(){ new OperaterNode() { Name="A", Value = false }, new OperaterNode() { Name = "B", Value = false } } },
                 }
 
             };
-            var p = new Simplifier(idempotent);
+            var p = new Simplifier(De);
             Console.WriteLine("start " + p.OperaterNode.Translate() );
            
             while (p.SimplifyAll())
