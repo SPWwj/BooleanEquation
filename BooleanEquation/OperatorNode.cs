@@ -31,6 +31,7 @@ namespace BooleanEquation
         {
             Operand, And, Or
         }
+
         public string Name { get; set; }
         public bool Value { get; set; }
         public int OperaterType { get; set; }

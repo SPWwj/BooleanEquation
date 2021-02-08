@@ -11,13 +11,13 @@ namespace BooleanEquation
         public bool Changed { get; set; } = false;
 
         public OperaterNode OperaterNode { get; set; }
-
-        public readonly OperaterNode OriginalNode;
-        public string OriginalTranslate = "";
+        public string OriginalTranslate { get; set; }
         // Only take place in Or Gate
         public bool Factorize()
         {
             if (OperaterNode.Operands == null) return false;
+            OriginalTranslate = OperaterNode.Translate();//Wired Bug
+
             if (OperaterNode.OperaterType == (int)OperaterNode.Operater.Or)
             {
 
@@ -90,6 +90,7 @@ namespace BooleanEquation
         public bool IdentityLaw()
         {
             if (OperaterNode.Operands == null) return false;
+            OriginalTranslate = OperaterNode.Translate();//Wired Bug
 
             for (int i = OperaterNode.Operands.Count - 1; i >= 0; i--)
             {
@@ -119,6 +120,8 @@ namespace BooleanEquation
         public bool NullLaw()
         {
             if (OperaterNode.Operands == null) return false;
+            OriginalTranslate = OperaterNode.Translate();//Wired Bug
+
             if (OperaterNode.OperaterType == (int)OperaterNode.Operater.And)
             {
                 for (int j = OperaterNode.Operands.Count - 1; j >= 0; j--)
@@ -170,6 +173,7 @@ namespace BooleanEquation
         {
 
             if (OperaterNode.Operands == null) return false;
+            OriginalTranslate = OperaterNode.Translate();//Wired Bug
 
             if (OperaterNode.OperaterType == (int)OperaterNode.Operater.Or)
             {
@@ -210,8 +214,7 @@ namespace BooleanEquation
         public bool CommonIdentitiesLaw()
         {
             if (OperaterNode.Operands == null) return false;
-            //OriginalTranslate = OperaterNode.Translate();
-
+            OriginalTranslate = OperaterNode.Translate();//Wired Bug
             if (OperaterNode.OperaterType == (int)OperaterNode.Operater.Or)
             {
                 for (int i = OperaterNode.Operands.Count - 1; i >= 0; i--)
@@ -227,6 +230,7 @@ namespace BooleanEquation
                                     
                                     if (OperaterNode.Operands[i].IsInverse(OperaterNode.Operands[j].Operands[z]))
                                     {
+   
                                         OperaterNode.Operands[j].Operands.RemoveAt(z);
                                         return true;
                                     }
@@ -250,8 +254,7 @@ namespace BooleanEquation
         public Simplifier(OperaterNode node,string translated)
         {
             OperaterNode = node;
-            OriginalNode = node;
-            this.OriginalTranslate = node.Translate();
+            this.OriginalTranslate = translated;
         }
         public string Temp { get; set; }
 
@@ -262,6 +265,7 @@ namespace BooleanEquation
         public bool IdempotentLaw()
         {
             if (OperaterNode.Operands == null) return false;
+            OriginalTranslate = OperaterNode.Translate();//Wired Bug
 
             if (OperaterNode.OperaterType == (int)OperaterNode.Operater.And)
             {
@@ -284,6 +288,45 @@ namespace BooleanEquation
                     for (int j = i - 1; j >= 0; j--)
                     {
                         if (OperaterNode.Operands[i].EqaulValue(OperaterNode.Operands[j]))
+                        {
+                            OperaterNode.Operands.RemoveAt(j);
+                            return true;
+                        }
+                    }
+                }
+            }
+            return false;
+        }
+
+        //A(A + B) = A , A + AB = A
+        public bool AbsortptionLaw()
+        {
+            if (OperaterNode.Operands == null) return false;
+            OriginalTranslate = OperaterNode.Translate();//Wired Bug
+
+            if (OperaterNode.OperaterType == (int)OperaterNode.Operater.And)
+            {
+                for (int i = OperaterNode.Operands.Count - 1; i >= 0; i--)
+                {
+                    for (int j = OperaterNode.Operands.Count-1; j >= 0; j--)
+                    {
+                        if (j!=i && OperaterNode.Operands[j].OperaterType== (int)OperaterNode.Operater.Or&&
+                           OperaterNode.Operands[j].Operands.Where(s=>s.EqaulValue(OperaterNode.Operands[i])).Any())
+                        {
+                            OperaterNode.Operands.RemoveAt(j);
+                            return true;
+                        }
+                    }
+                }
+            }
+            else if (OperaterNode.OperaterType == (int)OperaterNode.Operater.Or)
+            {
+                for (int i = OperaterNode.Operands.Count - 1; i >= 0; i--)
+                {
+                    for (int j = OperaterNode.Operands.Count - 1; j >= 0; j--)
+                    {
+                        if (j != i && OperaterNode.Operands[j].OperaterType == (int)OperaterNode.Operater.And &&
+                           OperaterNode.Operands[j].Operands.Where(s => s.EqaulValue(OperaterNode.Operands[i])).Any())
                         {
                             OperaterNode.Operands.RemoveAt(j);
                             return true;
@@ -317,7 +360,7 @@ namespace BooleanEquation
             }
             if (CommonIdentitiesLaw())
             {
-                Console.WriteLine("CommonIdentitiesLaw Applied : (" + OriginalTranslate + ") to " + OperaterNode.Translate());
+                Console.WriteLine("CommonIdentitiesLaw Applied : (" + OriginalTranslate+ ") to " + OperaterNode.Translate());
                 return true;
             }
             if (NullLaw())
@@ -328,6 +371,11 @@ namespace BooleanEquation
             if (IdempotentLaw())
             {
                 Console.WriteLine("IdempotentLaw Applied : (" + OriginalTranslate + ") to " + OperaterNode.Translate());
+                return true;
+            } 
+            if (AbsortptionLaw())
+            {
+                Console.WriteLine("AbsortptionLaw Applied : (" + OriginalTranslate + ") to " + OperaterNode.Translate());
                 return true;
             }
 
@@ -345,7 +393,7 @@ namespace BooleanEquation
                 {
                     if (OperaterNode.Operands[i] != null)
                     {
-                        var zoomIn = new Simplifier(OperaterNode.Operands[i], OperaterNode.Operands[i].Translate());
+                        var zoomIn = new Simplifier(OperaterNode.Operands[i]);
                         Changed = zoomIn.SimplifyAll()==true||Changed;
 
                         OperaterNode.Operands.RemoveAt(i);

@@ -97,7 +97,37 @@ namespace BooleanEquation
 
             };
 
-            var p = new Simplifier(OrCompute,OrCompute.Translate());
+            var distributiveLawTest = new OperaterNode()
+            {
+                OperaterType = (int)OperaterNode.Operater.And,
+                Operands = new List<OperaterNode>()
+                {
+                    new OperaterNode(){ OperaterType=(int)OperaterNode.Operater.Or,Operands=new List<OperaterNode>(){ new OperaterNode() { Name="A", Value = true }, new OperaterNode() { Name = "B" ,Value=true} } },
+                    new OperaterNode(){ OperaterType=(int)OperaterNode.Operater.Or,Operands=new List<OperaterNode>(){ new OperaterNode() { Name="A", Value = true }, new OperaterNode() { Name = "C", Value = true } } },
+                }
+
+            };
+            var absorption = new OperaterNode()
+            {
+                OperaterType = (int)OperaterNode.Operater.Or,
+                Operands = new List<OperaterNode>()
+                {
+                    new OperaterNode(){ Name="A",Value=true },
+                    new OperaterNode(){ OperaterType=(int)OperaterNode.Operater.And,Operands=new List<OperaterNode>(){ new OperaterNode() { Name="A", Value = true }, new OperaterNode() { Name = "C", Value = true } } },
+                }
+
+            };
+            var idempotent = new OperaterNode()
+            {
+                OperaterType = (int)OperaterNode.Operater.Or,
+                Operands = new List<OperaterNode>()
+                {
+                    new OperaterNode(){ Name="A",Value=true },
+                    new OperaterNode(){ Name="A",Value=false },
+                }
+
+            };
+            var p = new Simplifier(idempotent);
             Console.WriteLine("start " + p.OperaterNode.Translate() );
            
             while (p.SimplifyAll())
