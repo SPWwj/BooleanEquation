@@ -128,7 +128,18 @@ namespace BooleanEquation
                 }
 
             };
-            var p = new Simplifier(De);
+            var DeMorganLawExpend = new OperaterNode()
+            {
+                OperaterType = (int)OperaterNode.Operater.And,
+                Value = false,
+                Operands = new List<OperaterNode>()
+                {
+                    new OperaterNode(){ Name="A",Value=true },
+                    new OperaterNode(){ Name="B",Value=true },
+                }
+
+            };
+            var p = new Simplifier(DeMorganLawExpend);
             Console.WriteLine("start " + p.OperaterNode.Translate() );
            
             while (p.SimplifyAll())

@@ -6,7 +6,8 @@ using System.Threading.Tasks;
 
 namespace BooleanEquation
 {
-    public class OperaterNode { 
+    public class OperaterNode
+    {
         public int MemberCount()
         {
 
@@ -33,7 +34,7 @@ namespace BooleanEquation
         }
 
         public string Name { get; set; }
-        public bool Value { get; set; }
+        public bool Value { get; set; } = true;
         public int OperaterType { get; set; }
         public List<OperaterNode> Operands { get; set; }
 
@@ -65,16 +66,18 @@ namespace BooleanEquation
 
         public string Translate(bool started = false)
         {
-            if (Name == null)
-            {
+            if (OperaterType == (int)Operater.Operand) return Value == true ? Name : Contants.Not + Name;
+            else if (OperaterType != (int)Operater.Operand && Value == false) return $" {Contants.Not}({ZoomIn()}) ";
+            else if (started) return $" ({ZoomIn()}) ";
+            else return ZoomIn();
 
-                if (OperaterType == (int)Operater.Or && started)
-                {
-                    return $" ({ZoomIn()}) ";
-                }
-                else return ZoomIn();
-            }
-            else return Value == true ? Name : Contants.Not + Name;
+            //if (OperaterType == (int)Operater.Or ||  Value == false && started)
+            //{
+            //    return (OperaterType != (int)Operater.Operand && Value == false) ? $" {Contants.Not}({ZoomIn()}) " : $" ({ZoomIn()}) ";
+            //}
+            //else if (OperaterType == (int)Operater.Operand) return Value == true ? Name : Contants.Not + Name;
+            //else return ZoomIn();
+
         }
 
         public string ZoomIn()
