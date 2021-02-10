@@ -12,7 +12,6 @@ namespace BooleanEquation
 
         public OperaterNode OperaterNode { get; set; }
         public string OriginalTranslate { get; set; }
-        private bool deMorganLawLock = false;
         // Only take place in Or Gate
         public bool Factorize()
         {
@@ -159,7 +158,7 @@ namespace BooleanEquation
             if (OperaterNode.Operands == null) return false;
             for (int i = OperaterNode.Operands.Count - 1; i >= 0; i--)
             {
-                if (OperaterNode.Operands != null && OperaterNode.Operands[i].Operands?.Count == 1)
+                if (OperaterNode.Operands != null && OperaterNode.Operands[i].Operands?.Count == 1 && OperaterNode.Operands[i].Operands.First().Value==true)
                 {
                     OperaterNode.Operands.Add(OperaterNode.Operands[i].Operands[0]);
                     OperaterNode.Operands.RemoveAt(i);
@@ -167,7 +166,7 @@ namespace BooleanEquation
                 }
             }
             //A(B)D+C=ABD+C
-            if (OperaterNode.OperaterType == (int)OperaterNode.Operater.And)
+            if (OperaterNode.OperaterType == (int)OperaterNode.Operater.And && OperaterNode.Value==true) 
             {
                 for (int i = OperaterNode.Operands.Count - 1; i >= 0; i--)
                 {
@@ -183,7 +182,7 @@ namespace BooleanEquation
                 }
             }
             //A+(C+B)
-            else if (OperaterNode.OperaterType == (int)OperaterNode.Operater.Or)
+            else if (OperaterNode.OperaterType == (int)OperaterNode.Operater.Or && OperaterNode.Value == true)
             {
                 for (int i = OperaterNode.Operands.Count - 1; i >= 0; i--)
                 {
@@ -349,6 +348,7 @@ namespace BooleanEquation
                 return true;
 
             }
+
             return false;
         }
         public bool DeMorganLawFactorize()
@@ -381,6 +381,7 @@ namespace BooleanEquation
                 return true;
 
             }
+
             return false;
         }
 
@@ -428,37 +429,53 @@ namespace BooleanEquation
         }
         public bool Simplify()
         {
-            while (RemoveRedundance());
+            while (RemoveRedundance())
+            {
+                //OperaterNode.DeMorganLawLockExpend = false;
+                //OperaterNode.DeMorganLawLockFactor = false;
+            } ;
 
 
 
             if (IdentityLaw())
             {
+                OperaterNode.DeMorganLawLockExpend = false;
+                OperaterNode.DeMorganLawLockFactor = false;
                 Console.WriteLine("IdentityLaw Applied : (" + OriginalTranslate + ") Removed");
                 return true;
             }
             if (InverseLaw())
             {
+                OperaterNode.DeMorganLawLockExpend = false;
+                OperaterNode.DeMorganLawLockFactor = false;
                 Console.WriteLine("InverseLaw Applied : (" + OriginalTranslate + ") to " + OperaterNode.Translate());
                 return true;
             }
             if (CommonIdentitiesLaw())
             {
+                OperaterNode.DeMorganLawLockExpend = false;
+                OperaterNode.DeMorganLawLockFactor = false;
                 Console.WriteLine("CommonIdentitiesLaw Applied : (" + OriginalTranslate+ ") to " + OperaterNode.Translate());
                 return true;
             }
             if (NullLaw())
             {
+                OperaterNode.DeMorganLawLockExpend = false;
+                OperaterNode.DeMorganLawLockFactor = false;
                 Console.WriteLine("NullLaw Applied : (" + OriginalTranslate + ") to " + OperaterNode.Translate());
                 return true;
             }
             if (IdempotentLaw())
             {
+                OperaterNode.DeMorganLawLockExpend = false;
+                OperaterNode.DeMorganLawLockFactor = false;
                 Console.WriteLine("IdempotentLaw Applied : (" + OriginalTranslate + ") to " + OperaterNode.Translate());
                 return true;
             } 
             if (AbsortptionLaw())
             {
+                OperaterNode.DeMorganLawLockExpend = false;
+                OperaterNode.DeMorganLawLockFactor = false;
                 Console.WriteLine("AbsortptionLaw Applied : (" + OriginalTranslate + ") to " + OperaterNode.Translate());
                 return true;
             }   
@@ -466,42 +483,38 @@ namespace BooleanEquation
 
             if (Factorize())
             {
+                OperaterNode.DeMorganLawLockExpend = false;
+                OperaterNode.DeMorganLawLockFactor = false;
                 Console.WriteLine("Factorize Applied : (" + OriginalTranslate + ") to " + OperaterNode.Translate());
                 return true;
             }
 
-            //Wrong Redo
 
-            if (!deMorganLawLock)
+            if (!OperaterNode.DeMorganLawLockFactor)
             {
                 if (DeMorganLawExpend())
                 {
                     Console.WriteLine("DeMorganLawExpend Applied : (" + OriginalTranslate + ") to " + OperaterNode.Translate());
-                    deMorganLawLock = false;
+
+                    OperaterNode.DeMorganLawLockExpend = true;
+
                     return true;
                 }
-                else
-                {
-                    deMorganLawLock = true;
-                }
+ 
             }
 
-            //Wrong Redo
-            if (deMorganLawLock)
+            if (!OperaterNode.DeMorganLawLockExpend)
             {
                 if (DeMorganLawFactorize())
                 {
-                    Console.WriteLine("DeMorganLawExpend Applied : (" + OriginalTranslate + ") to " + OperaterNode.Translate());
-                    deMorganLawLock = true;
-
+                    Console.WriteLine("DeMorganLawFactorize Applied : (" + OriginalTranslate + ") to " + OperaterNode.Translate());
+                    OperaterNode.DeMorganLawLockFactor = true;
                     return true;
                 }
-                else
-                {
-                    deMorganLawLock = false;
-                }
+
             }
 
+            
 
 
 

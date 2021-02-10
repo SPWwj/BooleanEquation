@@ -8,6 +8,9 @@ namespace BooleanEquation
 {
     public class OperaterNode
     {
+        public bool DeMorganLawLockFactor { get; set; }
+        public bool DeMorganLawLockExpend { get; set; }
+
         public int MemberCount()
         {
 
