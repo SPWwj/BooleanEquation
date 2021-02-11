@@ -103,6 +103,16 @@ namespace BooleanEquation
                 Operands = new List<OperaterNode>()
                 {
                     new OperaterNode(){ OperaterType=(int)OperaterNode.Operater.Or,Operands=new List<OperaterNode>(){ new OperaterNode() { Name="A", Value = true }, new OperaterNode() { Name = "B" ,Value=true} } },
+                    new OperaterNode(){ OperaterType=(int)OperaterNode.Operater.Or,Operands=new List<OperaterNode>(){ new OperaterNode() { Name="D", Value = true }, new OperaterNode() { Name = "C", Value = true } } },
+                }
+
+            };
+            var FdistributiveLawTest = new OperaterNode()
+            {
+                OperaterType = (int)OperaterNode.Operater.And,
+                Operands = new List<OperaterNode>()
+                {
+                    new OperaterNode(){ Name="D" , Value=true},
                     new OperaterNode(){ OperaterType=(int)OperaterNode.Operater.Or,Operands=new List<OperaterNode>(){ new OperaterNode() { Name="A", Value = true }, new OperaterNode() { Name = "C", Value = true } } },
                 }
 
@@ -141,7 +151,7 @@ namespace BooleanEquation
             };
             var notDe = new OperaterNode() { Value = false, OperaterType = (int)OperaterNode.Operater.And, Operands =new List<OperaterNode>() { DeMorganLawExpend } };
             
-            var p = new Simplifier(DeMorganLawExpend);
+            var p = new Simplifier(distributiveLawTest);
             Console.WriteLine("start " + p.OperaterNode.Translate() );
            
             while (p.SimplifyAll())
@@ -150,6 +160,7 @@ namespace BooleanEquation
                 Console.WriteLine(p.OperaterNode.Translate());
             }
 
+            
             Console.WriteLine("End " + p.OperaterNode.Translate());
 
         }

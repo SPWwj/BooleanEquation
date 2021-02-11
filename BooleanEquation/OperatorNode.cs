@@ -9,7 +9,9 @@ namespace BooleanEquation
     public class OperaterNode
     {
         public bool DeMorganLawLockFactor { get; set; }
-        public bool DeMorganLawLockExpend { get; set; }
+        public bool DeMorganLawLockExpend { get; set; } 
+        public bool LockFactor { get; set; }
+        public bool LockExpend { get; set; }
 
         public int MemberCount()
         {
@@ -33,7 +35,7 @@ namespace BooleanEquation
         }
         public enum Operater
         {
-            Operand, And, Or
+            Operand=0, And=1, Or=2
         }
 
         public string Name { get; set; }

@@ -15,7 +15,7 @@ namespace BooleanEquation
         // Only take place in Or Gate
         public bool Factorize()
         {
-            if (OperaterNode.Operands == null) return false;
+            if (OperaterNode.Operands == null || OperaterNode.Value == false) return false;
             OriginalTranslate = OperaterNode.Translate();//Wired Bug
 
             if (OperaterNode.OperaterType == (int)OperaterNode.Operater.Or)
@@ -69,6 +69,8 @@ namespace BooleanEquation
                                         //Sequence is important
                                         OperaterNode.Operands.RemoveAt(i);
                                         OperaterNode.Operands.RemoveAt(z);
+
+
                                         return true;
 
                                     }
@@ -86,10 +88,71 @@ namespace BooleanEquation
 
             return false;
         }
+        public bool Expend()
+        {
+            if (OperaterNode.Operands == null || OperaterNode.Value == false || OperaterNode.Operands.Count < 2 || OperaterNode.OperaterType != (int)OperaterNode.Operater.And) return false;
+            OriginalTranslate = OperaterNode.Translate();//Wired Bug
+
+            for (int i = OperaterNode.Operands.Count - 2; i >= 0; i--)
+            {
+                if (OperaterNode.Operands[i].OperaterType == (int)OperaterNode.Operater.Or)
+                {
+                    if (OperaterNode.Operands[i + 1].OperaterType == (int)OperaterNode.Operater.Operand)
+                    {
+                        for (int j = OperaterNode.Operands[i].Operands.Count - 1; j >= 0; j--)
+                        {
+                            OperaterNode.Operands[i].Operands.Add(new OperaterNode()
+                            {
+                                Value = true,
+                                OperaterType = (int)OperaterNode.Operater.And,
+                                Operands = new List<OperaterNode>() {
+                                OperaterNode.Operands[i+1],OperaterNode.Operands[i].Operands[j]
+                                }
+                            });
+                            OperaterNode.Operands[i].Operands.RemoveAt(j);
+
+                        }
+                        OperaterNode.Operands.RemoveAt(i + 1);
+                        OperaterNode.LockExpend = true;
+                        return true;
+                    }
+                    if (OperaterNode.Operands[i + 1].OperaterType == (int)OperaterNode.Operater.Or)
+                    {
+                        var result = new OperaterNode() { Value=true, LockExpend=true, OperaterType=(int)OperaterNode.Operater.Or , Operands = new List<OperaterNode>() { } };
+                        for (int j = OperaterNode.Operands[i + 1].Operands.Count - 1; j >= 0; j--)
+                        {
+                            for (int y = OperaterNode.Operands[i].Operands.Count - 1; y >= 0; y--)
+                            {
+                                result.Operands.Add(new OperaterNode()
+                                {
+                                    Value = true,
+                                    OperaterType = (int)OperaterNode.Operater.And,
+                                    Operands = new List<OperaterNode>() {
+                                    OperaterNode.Operands[i].Operands[y],OperaterNode.Operands[i+1].Operands[j]
+                                 }
+                                });
+
+                            }
+
+
+                        }
+                        OperaterNode.Operands.Add(result);
+
+                        OperaterNode.Operands.RemoveAt(i + 1);
+                        OperaterNode.Operands.RemoveAt(i);
+
+                        return true;
+                    }
+                }
+            }
+
+            return false;
+        }
+
         //B1 = B || 0+A=A Done
         public bool IdentityLaw()
         {
-            if (OperaterNode.Operands == null) return false;
+            if (OperaterNode.Operands == null || OperaterNode.Value == false) return false;
             OriginalTranslate = OperaterNode.Translate();//Wired Bug
 
             for (int i = OperaterNode.Operands.Count - 1; i >= 0; i--)
@@ -119,7 +182,7 @@ namespace BooleanEquation
         //B0 = 0 || 1+A=1 //Done
         public bool NullLaw()
         {
-            if (OperaterNode.Operands == null) return false;
+            if (OperaterNode.Operands == null || OperaterNode.Value == false) return false;
             OriginalTranslate = OperaterNode.Translate();//Wired Bug
 
             if (OperaterNode.OperaterType == (int)OperaterNode.Operater.And)
@@ -152,13 +215,12 @@ namespace BooleanEquation
             }
             return false;
         }
-        //Done
         public bool RemoveRedundance()
         {
-            if (OperaterNode.Operands == null) return false;
+            if (OperaterNode.Operands == null || OperaterNode.Value == false) return false;
             for (int i = OperaterNode.Operands.Count - 1; i >= 0; i--)
             {
-                if (OperaterNode.Operands != null && OperaterNode.Operands[i].Operands?.Count == 1 && OperaterNode.Operands[i].Operands.First().Value==true)
+                if (OperaterNode.Operands != null && OperaterNode.Operands[i].Operands?.Count == 1 && OperaterNode.Operands[i].Operands.First().Value == true)
                 {
                     OperaterNode.Operands.Add(OperaterNode.Operands[i].Operands[0]);
                     OperaterNode.Operands.RemoveAt(i);
@@ -166,7 +228,7 @@ namespace BooleanEquation
                 }
             }
             //A(B)D+C=ABD+C
-            if (OperaterNode.OperaterType == (int)OperaterNode.Operater.And && OperaterNode.Value==true) 
+            if (OperaterNode.OperaterType == (int)OperaterNode.Operater.And)
             {
                 for (int i = OperaterNode.Operands.Count - 1; i >= 0; i--)
                 {
@@ -182,13 +244,13 @@ namespace BooleanEquation
                 }
             }
             //A+(C+B)
-            else if (OperaterNode.OperaterType == (int)OperaterNode.Operater.Or && OperaterNode.Value == true)
+            else if (OperaterNode.OperaterType == (int)OperaterNode.Operater.Or)
             {
                 for (int i = OperaterNode.Operands.Count - 1; i >= 0; i--)
                 {
                     if (OperaterNode.Operands[i].OperaterType == (int)OperaterNode.Operater.Or)
                     {
-                        foreach(OperaterNode n in OperaterNode.Operands[i].Operands)
+                        foreach (OperaterNode n in OperaterNode.Operands[i].Operands)
                         {
                             OperaterNode.Operands.Add(n);
                         }
@@ -204,7 +266,7 @@ namespace BooleanEquation
         public bool InverseLaw()
         {
 
-            if (OperaterNode.Operands == null) return false;
+            if (OperaterNode.Operands == null || OperaterNode.Value == false) return false;
             OriginalTranslate = OperaterNode.Translate();//Wired Bug
 
             if (OperaterNode.OperaterType == (int)OperaterNode.Operater.Or)
@@ -245,24 +307,24 @@ namespace BooleanEquation
         //A¬B OR B = A OR B
         public bool CommonIdentitiesLaw()
         {
-            if (OperaterNode.Operands == null) return false;
+            if (OperaterNode.Operands == null || OperaterNode.Value == false) return false;
             OriginalTranslate = OperaterNode.Translate();//Wired Bug
             if (OperaterNode.OperaterType == (int)OperaterNode.Operater.Or)
             {
                 for (int i = OperaterNode.Operands.Count - 1; i >= 0; i--)
                 {
                     if (OperaterNode.Operands[i].Name != null && OperaterNode.Operands[i].Value == true)
-                    { 
+                    {
                         for (int j = OperaterNode.Operands.Count - 1; j >= 0; j--)
                         {
-                            if (j != i && OperaterNode.Operands[j].OperaterType == (int)OperaterNode.Operater.And && OperaterNode.Operands[j].Operands != null && OperaterNode.Operands[j].Operands.Count>1)
+                            if (j != i && OperaterNode.Operands[j].OperaterType == (int)OperaterNode.Operater.And && OperaterNode.Operands[j].Operands != null && OperaterNode.Operands[j].Operands.Count > 1)
                             {
                                 for (int z = OperaterNode.Operands[j].Operands.Count - 1; z >= 0; z--)
                                 {
-                                    
+
                                     if (OperaterNode.Operands[i].IsInverse(OperaterNode.Operands[j].Operands[z]))
                                     {
-   
+
                                         OperaterNode.Operands[j].Operands.RemoveAt(z);
                                         return true;
                                     }
@@ -279,11 +341,11 @@ namespace BooleanEquation
 
             return false;
         }
-   
+
         //AA = A , A + A = A
         public bool IdempotentLaw()
         {
-            if (OperaterNode.Operands == null) return false;
+            if (OperaterNode.Operands == null || OperaterNode.Value == false) return false;
             OriginalTranslate = OperaterNode.Translate();//Wired Bug
 
             if (OperaterNode.OperaterType == (int)OperaterNode.Operater.And)
@@ -322,7 +384,7 @@ namespace BooleanEquation
             if (OperaterNode.Operands == null) return false;
 
             //¬(AB)=¬A+¬B
-            if (OperaterNode.OperaterType == (int)OperaterNode.Operater.And && OperaterNode.Value==false)
+            if (OperaterNode.OperaterType == (int)OperaterNode.Operater.And && OperaterNode.Value == false)
             {
 
                 for (int i = OperaterNode.Operands.Count - 1; i >= 0; i--)
@@ -343,7 +405,7 @@ namespace BooleanEquation
                     OperaterNode.Operands[i].Value = !OperaterNode.Operands[i].Value;
                 }
                 OperaterNode.OperaterType = (int)OperaterNode.Operater.And;
-                OperaterNode.Value =true;
+                OperaterNode.Value = true;
 
                 return true;
 
@@ -355,7 +417,7 @@ namespace BooleanEquation
         {
             if (OperaterNode.Operands == null) return false;
             //¬A¬B=¬(A+B)
-            if (OperaterNode.OperaterType == (int)OperaterNode.Operater.And && OperaterNode.Operands.Where(s=>s.Value==false).Count()==OperaterNode.Operands.Count)
+            if (OperaterNode.OperaterType == (int)OperaterNode.Operater.And && OperaterNode.Operands.Where(s => s.Value == false).Count() == OperaterNode.Operands.Count)
             {
 
                 for (int i = OperaterNode.Operands.Count - 1; i >= 0; i--)
@@ -388,17 +450,17 @@ namespace BooleanEquation
         //A(A + B) = A , A + AB = A
         public bool AbsortptionLaw()
         {
-            if (OperaterNode.Operands == null) return false;
+            if (OperaterNode.Operands == null || OperaterNode.Value == false) return false;
             OriginalTranslate = OperaterNode.Translate();//Wired Bug
 
             if (OperaterNode.OperaterType == (int)OperaterNode.Operater.And)
             {
                 for (int i = OperaterNode.Operands.Count - 1; i >= 0; i--)
                 {
-                    for (int j = OperaterNode.Operands.Count-1; j >= 0; j--)
+                    for (int j = OperaterNode.Operands.Count - 1; j >= 0; j--)
                     {
-                        if (j!=i && OperaterNode.Operands[j].OperaterType== (int)OperaterNode.Operater.Or&&
-                           OperaterNode.Operands[j].Operands.Where(s=>s.EqaulValue(OperaterNode.Operands[i])).Any())
+                        if (j != i && OperaterNode.Operands[j].OperaterType == (int)OperaterNode.Operater.Or &&
+                           OperaterNode.Operands[j].Operands.Where(s => s.EqaulValue(OperaterNode.Operands[i])).Any())
                         {
                             OperaterNode.Operands.RemoveAt(j);
                             return true;
@@ -427,66 +489,83 @@ namespace BooleanEquation
         {
             OperaterNode = node;
         }
+
+        private void LocksDeactivate()
+        {
+            OperaterNode.DeMorganLawLockExpend = false;
+            OperaterNode.DeMorganLawLockFactor = false;
+            OperaterNode.LockExpend = false;
+            OperaterNode.LockFactor = false;
+        }
         public bool Simplify()
         {
             while (RemoveRedundance())
             {
                 //OperaterNode.DeMorganLawLockExpend = false;
                 //OperaterNode.DeMorganLawLockFactor = false;
-            } ;
+            };
 
 
 
             if (IdentityLaw())
             {
-                OperaterNode.DeMorganLawLockExpend = false;
-                OperaterNode.DeMorganLawLockFactor = false;
+                LocksDeactivate();
                 Console.WriteLine("IdentityLaw Applied : (" + OriginalTranslate + ") Removed");
                 return true;
             }
             if (InverseLaw())
             {
-                OperaterNode.DeMorganLawLockExpend = false;
-                OperaterNode.DeMorganLawLockFactor = false;
+                LocksDeactivate();
                 Console.WriteLine("InverseLaw Applied : (" + OriginalTranslate + ") to " + OperaterNode.Translate());
                 return true;
             }
             if (CommonIdentitiesLaw())
             {
-                OperaterNode.DeMorganLawLockExpend = false;
-                OperaterNode.DeMorganLawLockFactor = false;
-                Console.WriteLine("CommonIdentitiesLaw Applied : (" + OriginalTranslate+ ") to " + OperaterNode.Translate());
+                LocksDeactivate();
+                Console.WriteLine("CommonIdentitiesLaw Applied : (" + OriginalTranslate + ") to " + OperaterNode.Translate());
                 return true;
             }
             if (NullLaw())
             {
-                OperaterNode.DeMorganLawLockExpend = false;
-                OperaterNode.DeMorganLawLockFactor = false;
+                LocksDeactivate();
                 Console.WriteLine("NullLaw Applied : (" + OriginalTranslate + ") to " + OperaterNode.Translate());
                 return true;
             }
             if (IdempotentLaw())
             {
-                OperaterNode.DeMorganLawLockExpend = false;
-                OperaterNode.DeMorganLawLockFactor = false;
+                LocksDeactivate();
                 Console.WriteLine("IdempotentLaw Applied : (" + OriginalTranslate + ") to " + OperaterNode.Translate());
                 return true;
-            } 
+            }
             if (AbsortptionLaw())
             {
-                OperaterNode.DeMorganLawLockExpend = false;
-                OperaterNode.DeMorganLawLockFactor = false;
+                LocksDeactivate();
                 Console.WriteLine("AbsortptionLaw Applied : (" + OriginalTranslate + ") to " + OperaterNode.Translate());
                 return true;
-            }   
-       
+            }
 
-            if (Factorize())
+            if (!OperaterNode.LockExpend)
             {
-                OperaterNode.DeMorganLawLockExpend = false;
-                OperaterNode.DeMorganLawLockFactor = false;
-                Console.WriteLine("Factorize Applied : (" + OriginalTranslate + ") to " + OperaterNode.Translate());
-                return true;
+                if (Factorize())
+                {
+                    OperaterNode.DeMorganLawLockExpend = false;
+                    OperaterNode.DeMorganLawLockFactor = false;
+                    OperaterNode.LockFactor = true;
+                    Console.WriteLine("Factorize Applied : (" + OriginalTranslate + ") to " + OperaterNode.Translate());
+                    return true;
+                }
+            }
+            if (!OperaterNode.LockFactor)
+            {
+                if (Expend())
+                {
+                    OperaterNode.DeMorganLawLockExpend = false;
+                    OperaterNode.DeMorganLawLockFactor = false;
+                    //OperaterNode.LockExpend = true; Need to put add changed node
+
+                    Console.WriteLine("ExpendApplied : (" + OriginalTranslate + ") to " + OperaterNode.Translate());
+                    return true;
+                }
             }
 
 
@@ -497,10 +576,11 @@ namespace BooleanEquation
                     Console.WriteLine("DeMorganLawExpend Applied : (" + OriginalTranslate + ") to " + OperaterNode.Translate());
 
                     OperaterNode.DeMorganLawLockExpend = true;
-
+                    OperaterNode.LockExpend = false;
+                    OperaterNode.LockFactor = false;
                     return true;
                 }
- 
+
             }
 
             if (!OperaterNode.DeMorganLawLockExpend)
@@ -509,12 +589,14 @@ namespace BooleanEquation
                 {
                     Console.WriteLine("DeMorganLawFactorize Applied : (" + OriginalTranslate + ") to " + OperaterNode.Translate());
                     OperaterNode.DeMorganLawLockFactor = true;
+                    OperaterNode.LockExpend = false;
+                    OperaterNode.LockFactor = false;
                     return true;
                 }
 
             }
 
-            
+
 
 
 
@@ -525,20 +607,20 @@ namespace BooleanEquation
         {
 
             bool changed = false;
-                if (OperaterNode.Operands == null) return changed;
-                for (int i = OperaterNode.Operands.Count - 1; i >= 0; i--)
+            if (OperaterNode.Operands == null) return changed;
+            for (int i = OperaterNode.Operands.Count - 1; i >= 0; i--)
+            {
+                if (OperaterNode.Operands[i] != null)
                 {
-                    if (OperaterNode.Operands[i] != null)
-                    {
-                        var zoomIn = new Simplifier(OperaterNode.Operands[i]);
-                        Changed = zoomIn.SimplifyAll()==true||Changed;
+                    var zoomIn = new Simplifier(OperaterNode.Operands[i]);
+                    Changed = zoomIn.SimplifyAll() == true || Changed;
 
-                        OperaterNode.Operands.RemoveAt(i);
-                        OperaterNode.Operands.Add(zoomIn.OperaterNode);
-                    }
+                    OperaterNode.Operands.RemoveAt(i);
+                    OperaterNode.Operands.Add(zoomIn.OperaterNode);
                 }
-                if (Changed) changed = true;
-                else changed = Simplify();
+            }
+            if (Changed) changed = true;
+            else changed = Simplify();
 
 
             return changed;
