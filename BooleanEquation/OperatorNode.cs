@@ -72,8 +72,8 @@ namespace BooleanEquation
         public string Translate(bool started = false)
         {
             if (OperaterType == (int)Operater.Operand) return Value == true ? Name : Contants.Not + Name;
-            else if (OperaterType != (int)Operater.Operand && Value == false) return $" {Contants.Not}({ZoomIn()}) ";
-            else if (started) return $" ({ZoomIn()}) ";
+            else if (OperaterType != (int)Operater.Operand && Value == false) return $"{Contants.Not}({ZoomIn()}) ";
+            else if (started) return $"({ZoomIn()})";
             else return ZoomIn();
 
             //if (OperaterType == (int)Operater.Or ||  Value == false && started)

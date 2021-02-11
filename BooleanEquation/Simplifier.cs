@@ -113,12 +113,12 @@ namespace BooleanEquation
 
                         }
                         OperaterNode.Operands.RemoveAt(i + 1);
-                        OperaterNode.LockExpend = true;
+                        OperaterNode.Operands[i].LockExpend = true;
                         return true;
                     }
                     if (OperaterNode.Operands[i + 1].OperaterType == (int)OperaterNode.Operater.Or)
                     {
-                        var result = new OperaterNode() { Value=true, LockExpend=true, OperaterType=(int)OperaterNode.Operater.Or , Operands = new List<OperaterNode>() { } };
+                        var result = new OperaterNode() { Value = true, LockExpend = true, OperaterType = (int)OperaterNode.Operater.Or, Operands = new List<OperaterNode>() { } };
                         for (int j = OperaterNode.Operands[i + 1].Operands.Count - 1; j >= 0; j--)
                         {
                             for (int y = OperaterNode.Operands[i].Operands.Count - 1; y >= 0; y--)
@@ -218,14 +218,11 @@ namespace BooleanEquation
         public bool RemoveRedundance()
         {
             if (OperaterNode.Operands == null || OperaterNode.Value == false) return false;
-            for (int i = OperaterNode.Operands.Count - 1; i >= 0; i--)
+
+            if (OperaterNode.Operands.Count == 1)
             {
-                if (OperaterNode.Operands != null && OperaterNode.Operands[i].Operands?.Count == 1 && OperaterNode.Operands[i].Operands.First().Value == true)
-                {
-                    OperaterNode.Operands.Add(OperaterNode.Operands[i].Operands[0]);
-                    OperaterNode.Operands.RemoveAt(i);
-                    return true;
-                }
+                OperaterNode = OperaterNode.Operands[0];
+                return true;
             }
             //A(B)D+C=ABD+C
             if (OperaterNode.OperaterType == (int)OperaterNode.Operater.And)
@@ -499,11 +496,7 @@ namespace BooleanEquation
         }
         public bool Simplify()
         {
-            while (RemoveRedundance())
-            {
-                //OperaterNode.DeMorganLawLockExpend = false;
-                //OperaterNode.DeMorganLawLockFactor = false;
-            };
+
 
 
 
@@ -511,36 +504,42 @@ namespace BooleanEquation
             {
                 LocksDeactivate();
                 Console.WriteLine("IdentityLaw Applied : (" + OriginalTranslate + ") Removed");
+                while (RemoveRedundance()) ;
                 return true;
             }
             if (InverseLaw())
             {
                 LocksDeactivate();
                 Console.WriteLine("InverseLaw Applied : (" + OriginalTranslate + ") to " + OperaterNode.Translate());
+                while (RemoveRedundance()) ;
                 return true;
             }
             if (CommonIdentitiesLaw())
             {
                 LocksDeactivate();
                 Console.WriteLine("CommonIdentitiesLaw Applied : (" + OriginalTranslate + ") to " + OperaterNode.Translate());
+                while (RemoveRedundance()) ;
                 return true;
             }
             if (NullLaw())
             {
                 LocksDeactivate();
                 Console.WriteLine("NullLaw Applied : (" + OriginalTranslate + ") to " + OperaterNode.Translate());
+                while (RemoveRedundance()) ;
                 return true;
             }
             if (IdempotentLaw())
             {
                 LocksDeactivate();
                 Console.WriteLine("IdempotentLaw Applied : (" + OriginalTranslate + ") to " + OperaterNode.Translate());
+                while (RemoveRedundance()) ;
                 return true;
             }
             if (AbsortptionLaw())
             {
                 LocksDeactivate();
                 Console.WriteLine("AbsortptionLaw Applied : (" + OriginalTranslate + ") to " + OperaterNode.Translate());
+                while (RemoveRedundance()) ;
                 return true;
             }
 
@@ -550,8 +549,8 @@ namespace BooleanEquation
                 {
                     OperaterNode.DeMorganLawLockExpend = false;
                     OperaterNode.DeMorganLawLockFactor = false;
-                    OperaterNode.LockFactor = true;
                     Console.WriteLine("Factorize Applied : (" + OriginalTranslate + ") to " + OperaterNode.Translate());
+                    while (RemoveRedundance()) ;
                     return true;
                 }
             }
@@ -561,9 +560,10 @@ namespace BooleanEquation
                 {
                     OperaterNode.DeMorganLawLockExpend = false;
                     OperaterNode.DeMorganLawLockFactor = false;
-                    //OperaterNode.LockExpend = true; Need to put add changed node
+                    OperaterNode.LockExpend = true;
 
                     Console.WriteLine("ExpendApplied : (" + OriginalTranslate + ") to " + OperaterNode.Translate());
+                    while (RemoveRedundance()) ;
                     return true;
                 }
             }
@@ -578,6 +578,7 @@ namespace BooleanEquation
                     OperaterNode.DeMorganLawLockExpend = true;
                     OperaterNode.LockExpend = false;
                     OperaterNode.LockFactor = false;
+                    while (RemoveRedundance()) ;
                     return true;
                 }
 
@@ -591,6 +592,7 @@ namespace BooleanEquation
                     OperaterNode.DeMorganLawLockFactor = true;
                     OperaterNode.LockExpend = false;
                     OperaterNode.LockFactor = false;
+                    while (RemoveRedundance()) ;
                     return true;
                 }
 

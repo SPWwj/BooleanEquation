@@ -151,8 +151,9 @@ namespace BooleanEquation
             };
             var notDe = new OperaterNode() { Value = false, OperaterType = (int)OperaterNode.Operater.And, Operands =new List<OperaterNode>() { DeMorganLawExpend } };
             
-            var p = new Simplifier(distributiveLawTest);
-            Console.WriteLine("start " + p.OperaterNode.Translate() );
+            var p = new Simplifier(FdistributiveLawTest);
+            Console.WriteLine("start "  );
+            Console.WriteLine(p.OperaterNode.Translate());
            
             while (p.SimplifyAll())
             {
@@ -161,7 +162,6 @@ namespace BooleanEquation
             }
 
             
-            Console.WriteLine("End " + p.OperaterNode.Translate());
 
         }
 
